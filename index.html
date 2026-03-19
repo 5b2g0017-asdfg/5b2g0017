@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE HOMEWORK | 5B2G0017</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --text: #ffffff;
+            --accent: #bcff00; 
+            --gray: #222;
+            --transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        /* 左側固定導覽列 */
+        .side-nav {
+            position: fixed; left: 0; top: 0; height: 100vh; width: 80px;
+            border-right: 1px solid var(--gray);
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; padding: 2rem 0; z-index: 1000;
+            background: var(--bg);
+        }
+        .nav-brand { font-weight: 900; writing-mode: vertical-rl; transform: rotate(180deg); color: var(--accent); }
+        .social-links { display: flex; flex-direction: column; gap: 1.5rem; font-size: 0.8rem; cursor: pointer; }
+
+        /* 主容器 */
+        .container { margin-left: 80px; padding: 2rem; transition: var(--transition); }
+
+        /* 標題區塊 */
+        header {
+            display: grid; grid-template-columns: 1fr;
+            min-height: 31vh; align-items: end; margin-bottom: 5rem;
+        }
+        .main-title h1 { 
+            font-size: clamp(4rem, 12vw, 10rem); 
+            line-height: 0.85; letter-spacing: -4px;
+            text-transform: uppercase;
+        }
+
+        /* 元素豐富的網格系統 */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 250px;
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .card { 
+            background: var(--gray); border-radius: 4px; overflow: hidden; position: relative;
+            transition: var(--transition); cursor: pointer;
+        }
+/* 預設狀態：圖片是亮的 */
+.card img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    opacity: 1;             /* 初始完全明亮 */
+    filter: brightness(1);  /* 確保亮度正常 */
+    transition: var(--transition); 
+}
+
+/* 當滑鼠接觸到卡片時：圖片變暗 */
+.card:hover img { 
+    opacity: 0.3;           /* 降低透明度顯露底色(黑色) */
+    filter: brightness(0.5); /* 額外降低亮度增加重量感 */
+    transform: scale(1.05);  /* 輕微放大保持動態感 */
+}
+
+/* 調整卡片文字：當背景變暗時，文字要更顯眼 */
+.card-content h3 { 
+    font-size: 1.5rem; 
+    text-transform: uppercase; 
+    border-bottom: 2px solid var(--accent); 
+    display: inline-block;
+    transition: var(--transition);
+}
+
+/* 選配：滑鼠移入時讓文字顏色變色 (例如變成螢光綠) */
+.card:hover .card-content h3 {
+    color: var(--accent);
+    transform: translateY(-5px);
+}
+
+        .tall { grid-row: span 2; }
+        .wide { grid-column: span 2; }
+
+        .card-content {
+            position: absolute; bottom: 20px; left: 20px;
+            z-index: 2;
+        }
+        .card-content h3 { font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid var(--accent); display: inline-block; }
+
+        /* 跑馬燈 */
+        .marquee {
+            width: 100vw; margin-left: -80px; padding: 1.5rem 0;
+            background: var(--accent); color: #000;
+            overflow: hidden; white-space: nowrap;
+            font-size: 2rem; font-weight: 900; transform: rotate(-1deg);
+        }
+        .marquee span { display: inline-block; animation: scroll 20s linear infinite; }
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* 內容詳解層 (Content Overlay) */
+        .content-overlay {
+            position: fixed; top: 0; left: 80px; width: calc(100% - 80px); height: 100vh;
+            background: var(--bg); z-index: 2000;
+            transform: translateY(100%); transition: var(--transition);
+            overflow-y: auto; padding: 4rem;
+        }
+        .content-overlay.active { transform: translateY(0); }
+
+        .close-btn {
+            position: fixed; top: 2rem; right: 2rem;
+            background: var(--accent); color: #000; border: none;
+            padding: 1rem 1.5rem; font-weight: 900; cursor: pointer;
+            z-index: 2001; border-radius: 50px;
+        }
+
+        /* 內部內容排版 */
+        .inner-content { max-width: 900px; margin: 0 auto; }
+        .inner-content h2 { font-size: 4rem; color: var(--accent); margin-bottom: 2rem; }
+        .inner-content p { font-size: 1.2rem; line-height: 1.8; opacity: 0.8; margin-bottom: 1.5rem; }
+        .project-list { margin-top: 3rem; border-top: 1px solid var(--gray); padding-top: 2rem; }
+        .project-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--gray); }
+
+        @media (max-width: 1024px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .content-overlay { left: 0; width: 100%; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="side-nav">
+        <div class="nav-brand">5B2G0017</div>
+        <div class="social-links">
+            <span>IG</span><span>TW</span><span>FB</span>
+        </div>
+    </nav>
+
+    <div class="container" id="mainContainer">
+        <header>
+            <div class="main-title">
+                <h1>MY<br><span style="color:transparent; -webkit-text-stroke: 1px white;">WEB</span></h1>
+            </div>
+        </header>
+
+        <section class="bento-grid">
+            <div class="card wide tall" onclick="openPage('homework')">
+                <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&w=800" alt="">
+                <div class="card-content"><h3>HOMEWORK</h3></div>
+            </div>
+            
+            <div class="card tall" onclick="openPage('about')">
+                <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400" alt="">
+                <div class="card-content"><h3>ABOUT ME</h3></div>
+            </div>
+        </section>
+
+        <div class="marquee">
+            <span>HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • </span>
+        </div>
+    </div>
+
+    <div id="page-homework" class="content-overlay">
+        <button class="close-btn" onclick="closePage()">CLOSE</button>
+        <div class="inner-content">
+            <h2>MY HOMEWORK</h2>
+            <p>這裡記錄了我的作業</p>
+            <div class="project-list">
+                <div class="project-item"><span>coming soon...</span><span>MAR 2026</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-about" class="content-overlay">
+        <button class="close-btn" onclick="closePage()">CLOSE</button>
+        <div class="inner-content">
+            <h2>ABOUT ME</h2>
+            <p>coming soon...</p>
+        </div>
+    </div>
+
+    <script>
+        function openPage(pageId) {
+            // 隱藏主容器並顯示對應頁面
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.body.style.overflow = 'hidden'; // 禁止底層滾動
+        }
+
+        function closePage() {
+            // 關閉所有頁面
+            const overlays = document.querySelectorAll('.content-overlay');
+            overlays.forEach(el => el.classList.remove('active'));
+            document.body.style.overflow = 'auto'; // 恢復滾動
+        }
+    </script>
+
+</body>
+</html>
