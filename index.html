@@ -3,141 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE HOMEWORK | 5B2G0017</title>
+    <title>THE HOMEWORK | 5B2G0017 - RIMURU HOME</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+
         :root {
             --bg: #0d0d0d;
             --text: #ffffff;
             --accent: #bcff00; 
+            --rimuru-blue: #87ceeb; 
             --gray: #222;
-            --transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+            --transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            font-family: 'Space Grotesk', sans-serif; 
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            overflow-x: hidden;
+            scroll-behavior: smooth; /* 增加平滑滾動效果 */
+        }
+
+        /* --- 動態背景 Canvas --- */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.6;
+        }
+
+        /* 捲動條美化 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
         /* 左側固定導覽列 */
         .side-nav {
             position: fixed; left: 0; top: 0; height: 100vh; width: 80px;
             border-right: 1px solid var(--gray);
             display: flex; flex-direction: column; justify-content: space-between;
-            align-items: center; padding: 2rem 0; z-index: 1000;
-            background: var(--bg);
+            align-items: center; padding: 2.5rem 0; z-index: 1000;
+            background: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(10px);
         }
-        .nav-brand { font-weight: 900; writing-mode: vertical-rl; transform: rotate(180deg); color: var(--accent); }
-        .social-links { display: flex; flex-direction: column; gap: 1.5rem; font-size: 0.8rem; cursor: pointer; }
+
+        /* --- 大頭貼樣式 (Rimuru GIF) --- */
+        .nav-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--rimuru-blue);
+            background-image: url('https://static.zerochan.net/Rimuru.Tempest.full.3635171.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(135, 206, 235, 0.3);
+        }
+        
+        .nav-avatar:hover {
+            transform: scale(1.2) rotate(-5deg); /* 換個方向旋轉增加動感 */
+            box-shadow: 0 0 30px rgba(135, 206, 235, 0.7);
+            border-color: #fff;
+        }
+
+        .social-links { display: flex; flex-direction: column; gap: 1.5rem; font-size: 0.8rem; cursor: pointer; color: #666; }
 
         /* 主容器 */
-        .container { margin-left: 80px; padding: 2rem; transition: var(--transition); }
+        .container { margin-left: 80px; padding: 2rem; position: relative; z-index: 1; }
 
-        /* 標題區塊 */
         header {
-            display: grid; grid-template-columns: 1fr;
-            min-height: 31vh; align-items: end; margin-bottom: 5rem;
+            display: flex;
+            min-height: 30vh; align-items: flex-end; margin-bottom: 5rem;
         }
         .main-title h1 { 
             font-size: clamp(4rem, 12vw, 10rem); 
             line-height: 0.85; letter-spacing: -4px;
             text-transform: uppercase;
+            animation: heroFloat 5s ease-in-out infinite;
         }
 
-        /* 元素豐富的網格系統 */
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* 網格系統 */
         .bento-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: 250px;
+            grid-auto-rows: 280px;
             gap: 1.5rem;
             margin-bottom: 5rem;
         }
 
         .card { 
-            background: var(--gray); border-radius: 4px; overflow: hidden; position: relative;
-            transition: var(--transition); cursor: pointer;
+            background: rgba(34, 34, 34, 0.5); 
+            border-radius: 4px; overflow: hidden; position: relative;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            opacity: 0; transform: translateY(50px);
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
         }
-/* 預設狀態：圖片是亮的 */
-.card img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    opacity: 1;             /* 初始完全明亮 */
-    filter: brightness(1);  /* 確保亮度正常 */
-    transition: var(--transition); 
-}
 
-/* 當滑鼠接觸到卡片時：圖片變暗 */
-.card:hover img { 
-    opacity: 0.3;           /* 降低透明度顯露底色(黑色) */
-    filter: brightness(0.5); /* 額外降低亮度增加重量感 */
-    transform: scale(1.05);  /* 輕微放大保持動態感 */
-}
-
-/* 調整卡片文字：當背景變暗時，文字要更顯眼 */
-.card-content h3 { 
-    font-size: 1.5rem; 
-    text-transform: uppercase; 
-    border-bottom: 2px solid var(--accent); 
-    display: inline-block;
-    transition: var(--transition);
-}
-
-/* 選配：滑鼠移入時讓文字顏色變色 (例如變成螢光綠) */
-.card:hover .card-content h3 {
-    color: var(--accent);
-    transform: translateY(-5px);
-}
+        .card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: var(--transition); }
+        .card:hover { border-color: var(--accent); }
+        .card:hover img { opacity: 0.2; transform: scale(1.1); }
 
         .tall { grid-row: span 2; }
         .wide { grid-column: span 2; }
 
-        .card-content {
-            position: absolute; bottom: 20px; left: 20px;
-            z-index: 2;
-        }
-        .card-content h3 { font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid var(--accent); display: inline-block; }
+        .card-content { position: absolute; bottom: 20px; left: 20px; z-index: 2; }
+        .card-content h3 { font-size: 1.8rem; text-transform: uppercase; border-bottom: 2px solid var(--accent); display: inline-block; }
 
         /* 跑馬燈 */
         .marquee {
             width: 100vw; margin-left: -80px; padding: 1.5rem 0;
             background: var(--accent); color: #000;
             overflow: hidden; white-space: nowrap;
-            font-size: 2rem; font-weight: 900; transform: rotate(-1deg);
+            font-size: 2.5rem; font-weight: 900; transform: rotate(-1deg);
+            margin-top: 50px;
         }
-        .marquee span { display: inline-block; animation: scroll 20s linear infinite; }
+        .marquee span { display: inline-block; animation: scroll 25s linear infinite; }
         @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        /* 內容詳解層 (Content Overlay) */
+        /* 內容詳解層 */
         .content-overlay {
             position: fixed; top: 0; left: 80px; width: calc(100% - 80px); height: 100vh;
-            background: var(--bg); z-index: 2000;
+            background: rgba(13, 13, 13, 0.95); z-index: 2000;
             transform: translateY(100%); transition: var(--transition);
-            overflow-y: auto; padding: 4rem;
+            overflow-y: auto; padding: 6rem 4rem;
+            backdrop-filter: blur(20px);
         }
         .content-overlay.active { transform: translateY(0); }
 
         .close-btn {
             position: fixed; top: 2rem; right: 2rem;
             background: var(--accent); color: #000; border: none;
-            padding: 1rem 1.5rem; font-weight: 900; cursor: pointer;
-            z-index: 2001; border-radius: 50px;
+            padding: 1.2rem 2rem; font-weight: 900; border-radius: 50px;
+            z-index: 2001; cursor: pointer;
         }
 
-        /* 內部內容排版 */
-        .inner-content { max-width: 900px; margin: 0 auto; }
-        .inner-content h2 { font-size: 4rem; color: var(--accent); margin-bottom: 2rem; }
-        .inner-content p { font-size: 1.2rem; line-height: 1.8; opacity: 0.8; margin-bottom: 1.5rem; }
-        .project-list { margin-top: 3rem; border-top: 1px solid var(--gray); padding-top: 2rem; }
-        .project-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--gray); }
+        .inner-content { max-width: 900px; margin: 0 auto; opacity: 0; transform: translateY(30px); }
+        .inner-content.reveal { opacity: 1; transform: translateY(0); transition: 1s ease 0.3s; }
 
         @media (max-width: 1024px) {
             .bento-grid { grid-template-columns: repeat(2, 1fr); }
-            .content-overlay { left: 0; width: 100%; padding: 2rem; }
+            .content-overlay { left: 0; width: 100%; }
+            .side-nav { display: none; }
+            .container { margin-left: 0; }
         }
     </style>
 </head>
 <body>
 
+    <canvas id="bg-canvas"></canvas>
+
     <nav class="side-nav">
-        <div class="nav-brand">5B2G0017</div>
+        <div class="nav-avatar" onclick="backToHome()" title="回首頁"></div>
+        
         <div class="social-links">
             <span>IG</span><span>TW</span><span>FB</span>
         </div>
@@ -155,51 +183,123 @@
                 <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&w=800" alt="">
                 <div class="card-content"><h3>HOMEWORK</h3></div>
             </div>
-            
             <div class="card tall" onclick="openPage('about')">
                 <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400" alt="">
                 <div class="card-content"><h3>ABOUT ME</h3></div>
             </div>
+            <div class="card" onclick="openPage('lab')">
+                <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=400" alt="">
+                <div class="card-content"><h3>LAB</h3></div>
+            </div>
+            <div class="card wide" onclick="openPage('contact')">
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800" alt="">
+                <div class="card-content"><h3>CONTACT</h3></div>
+            </div>
         </section>
 
         <div class="marquee">
-            <span>HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • HOMEWORK • </span>
+            <span>CREATIVE DESIGN • WEB DEVELOPMENT • 5B2G0017 • MAR 2026 • WORK HARD • PLAY HARD • </span>
+            <span>CREATIVE DESIGN • WEB DEVELOPMENT • 5B2G0017 • MAR 2026 • WORK HARD • PLAY HARD • </span>
         </div>
     </div>
 
     <div id="page-homework" class="content-overlay">
-        <button class="close-btn" onclick="closePage()">CLOSE</button>
-        <div class="inner-content">
-            <h2>MY HOMEWORK</h2>
-            <p>這裡記錄了我的作業</p>
-            <div class="project-list">
-                <div class="project-item"><span>coming soon...</span><span>MAR 2026</span></div>
-            </div>
-        </div>
+        <button class="close-btn" onclick="closePage()">BACK TO HOME</button>
+        <div class="inner-content"><h2>MY PROJECTS</h2><p>這裡是作業區...</p></div>
     </div>
 
     <div id="page-about" class="content-overlay">
         <button class="close-btn" onclick="closePage()">CLOSE</button>
-        <div class="inner-content">
-            <h2>ABOUT ME</h2>
-            <p>coming soon...</p>
-        </div>
+        <div class="inner-content"><h2>ABOUT ME</h2><p>我是 5B2G0017...</p></div>
     </div>
 
     <script>
+        // --- 1. 背景粒子系統 ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = '#bcff00';
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        function initParticles() { for (let i = 0; i < 80; i++) particles.push(new Particle()); }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.strokeStyle = `rgba(188, 255, 0, ${1 - dist/150})`;
+                        ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        initParticles(); animate();
+
+        // --- 2. 頁面控制 ---
         function openPage(pageId) {
-            // 隱藏主容器並顯示對應頁面
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.body.style.overflow = 'hidden'; // 禁止底層滾動
+            const overlay = document.getElementById('page-' + pageId);
+            if(overlay) {
+                overlay.classList.add('active');
+                overlay.querySelector('.inner-content').classList.add('reveal');
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         function closePage() {
-            // 關閉所有頁面
             const overlays = document.querySelectorAll('.content-overlay');
-            overlays.forEach(el => el.classList.remove('active'));
-            document.body.style.overflow = 'auto'; // 恢復滾動
+            overlays.forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.inner-content').classList.remove('reveal');
+            });
+            document.body.style.overflow = 'auto';
         }
-    </script>
 
+        // --- 3. 新增：回首頁功能 ---
+        function backToHome() {
+            closePage(); // 關閉所有展開的頁面
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // 平滑滾動到頂部
+            });
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePage(); });
+    </script>
 </body>
 </html>
