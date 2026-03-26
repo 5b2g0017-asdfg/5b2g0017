@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>利姆路 | 核心方塊系統</title>
+    <title>個人網站</title>
     <style>
         :root {
             --rimuru-blue: #a0d8ef;
             --deep-space: #0a0f1d;
-            
-            /* --- 垂直距離與尺寸控制變數 (方便自行調整) --- */
-            --box-gap: 20px;     /* 圖片與文字塊之間的距離 */
-            --text-gap: 8px;     /* ANALYSIS 與 標題之間的距離 */
-            --icon-size: 100px;  /* 圖片/GIF 的顯示大小 */
+            --box-gap: 20px;
+            --text-gap: 8px;
+            --icon-size: 100px;
         }
 
         body {
@@ -41,20 +39,25 @@
             z-index: 1;
         }
 
+        /* --- 改進的動畫系統 --- */
         .page-section {
             display: none;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transform: scale(0.95);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
             width: 100%; height: 100%;
-            justify-content: center;
-            align-items: center;
             position: absolute;
+            box-sizing: border-box;
         }
 
-        .page-section.active { display: flex; opacity: 1; }
+        /* 當 active 類別被加入時，觸發動畫 */
+        .page-section.active {
+            opacity: 1;
+            transform: scale(1);
+        }
 
         /* --- 初始啟動頁面 --- */
-        #init-page { flex-direction: column; }
+        #init-page { flex-direction: column; justify-content: center; align-items: center; }
         .rimuru-core {
             width: 160px; height: 130px;
             background: linear-gradient(135deg, #a0d8ef 0%, #3498db 100%);
@@ -73,12 +76,14 @@
         }
         .btn-main:hover { background-color: var(--rimuru-blue); color: var(--deep-space); transform: scale(1.05); }
 
-        /* --- 方塊選單佈局 (300x280 以容納圖片與間距) --- */
+        /* --- 四方塊選單 (Grid) --- */
         #menu-grid {
             grid-template-columns: repeat(2, 300px); 
             grid-template-rows: repeat(2, 280px); 
-            gap: 40px; 
-            justify-content: center; align-content: center;
+            column-gap: 35px;
+            row-gap: 15px;
+            justify-content: center; 
+            align-content: center;
         }
 
         .menu-box {
@@ -87,97 +92,79 @@
             border-radius: 20px; 
             backdrop-filter: blur(8px);
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             display: flex;
             flex-direction: column;
             justify-content: center; 
             align-items: center;     
             padding: 30px;
-            box-sizing: border-box;
             gap: var(--box-gap);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         .menu-box:hover {
             background: rgba(160, 216, 239, 0.15); 
             border-color: var(--rimuru-blue); 
             transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(160, 216, 239, 0.4);
         }
 
-        /* --- 圖片/GIF 顯示容器 --- */
-        .box-icon {
-            width: var(--icon-size);
-            height: var(--icon-size);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.3s ease;
-            overflow: hidden;
-        }
+        .box-icon { width: var(--icon-size); height: var(--icon-size); display: flex; justify-content: center; align-items: center; transition: transform 0.3s ease; }
+        .box-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .menu-box:hover .box-icon { transform: scale(1.1); }
 
-        .box-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* 保持 GIF/圖片 比例不變形 */
-            filter: drop-shadow(0 0 8px rgba(160, 216, 239, 0.3)); /* 微微發光感 */
-        }
-
-        /* 接觸方塊時：圖片放大 (無旋轉、無背景發光) */
-        .menu-box:hover .box-icon {
-            transform: scale(1.1); 
-        }
-
-        /* --- 文字內容區塊 --- */
-        .text-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--text-gap);
-            text-align: center;
-        }
+        .text-content { display: flex; flex-direction: column; align-items: center; gap: var(--text-gap); text-align: center; }
         .tag { font-size: 0.8rem; color: var(--rimuru-blue); opacity: 0.6; letter-spacing: 2px; }
         h3 { font-size: 1.6rem; margin: 0; letter-spacing: 4px; font-weight: bold; }
 
-        /* --- 內容詳細介面 --- */
+        /* --- 詳細頁面 (Flex) --- */
+        #detail-section { justify-content: center; align-items: center; }
         .detail-page {
             width: 85%; height: 80%;
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid var(--rimuru-blue);
             border-radius: 30px;
-            padding: 60px;
+            padding: 50px;
             box-sizing: border-box;
-            position: relative;
             backdrop-filter: blur(20px);
             display: flex; flex-direction: column;
+            position: relative;
         }
-        .detail-header h2 { font-size: 2.5rem; color: var(--rimuru-blue); margin: 0; letter-spacing: 4px; }
         
-        /* --- 關閉按鈕：固定位置、不隨內容位移 --- */
+        .detail-header h2 { font-size: 2.5rem; color: var(--rimuru-blue); margin: 0 0 20px 0; letter-spacing: 4px; }
+        
         .close-btn {
-            position: fixed; 
-            top: 30px; 
-            right: 30px;
-            width: 50px; 
-            height: 50px;
+            position: fixed; top: 30px; right: 30px;
+            width: 50px; height: 50px;
             background: rgba(255, 255, 255, 0.1); 
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; 
-            border-radius: 50%; 
-            cursor: pointer;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            font-size: 1.8rem; 
-            z-index: 9999; 
+            color: #fff; border-radius: 50%; 
+            cursor: pointer; display: flex; 
+            justify-content: center; align-items: center;
+            font-size: 1.8rem; z-index: 9999; 
             transition: all 0.3s ease;
         }
-        .close-btn:hover {
-            background: #ff4757; 
-            transform: rotate(90deg) scale(1.1); 
-            border-color: transparent;
-        }
+        .close-btn:hover { background: #ff4757; transform: rotate(90deg) scale(1.1); border-color: transparent; }
 
+        /* --- 內容區域表格與文字 --- */
         table { width: 100%; border-spacing: 0 15px; }
-        td { padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+        .clickable-td { 
+            padding: 25px; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(160, 216, 239, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .clickable-td:hover {
+            background: rgba(160, 216, 239, 0.15);
+            border-color: var(--rimuru-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(160, 216, 239, 0.2);
+        }
+        
+        .simple-text { font-size: 1.2rem; line-height: 1.8; color: #fff; padding: 10px; }
+        a { color: var(--rimuru-blue); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -185,82 +172,76 @@
     <canvas id="bg-canvas"></canvas>
 
     <div class="wrapper">
-        <!-- 初始啟動頁面 -->
-        <section id="init-page" class="page-section active" style="display: flex; opacity: 1;">
+        <section id="init-page" class="page-section active" style="display: flex;">
             <div class="rimuru-core"></div>
-            <h2 style="letter-spacing: 8px; margin-bottom: 30px;">CENTRAL HUB</h2>
-            <button class="btn-main" onclick="switchPage('menu-grid')">啟動解析鑑定</button>
+            <h2 style="letter-spacing: 8px; margin-bottom: 30px;">MY WEB</h2>
+            <button class="btn-main" onclick="switchPage('menu-grid')">OPEN</button>
         </section>
 
-        <!-- 方塊選單頁面 -->
         <section id="menu-grid" class="page-section">
             <button class="close-btn" onclick="switchPage('init-page')">×</button>
-            
-            <!-- 方塊 1 -->
-            <div class="menu-box" onclick="openDetail('status-win', '《個體解析報告》')">
-                <div class="box-icon">
-                    <img src="images/analysis.gif" alt="能力屬性 GIF"> 
-                </div>
-                <div class="text-content">
-                    <div class="tag">ANALYSIS</div>
-                    <h3>能力屬性</h3>
-                </div>
+            <div class="menu-box" onclick="openDetail('status-win', '《作品》')">
+                <div class="box-icon"><img src="images/analysis.gif" alt=""></div>
+                <div class="text-content"><div class="tag">WORKS</div><h3>作品</h3></div>
             </div>
-
-            <!-- 方塊 2 -->
-            <div class="menu-box" onclick="openDetail('nation-win', '《聯邦檔案庫》')">
-                <div class="box-icon">
-                    <img src="images/archive.gif" alt="聯邦檔案 GIF">
-                </div>
-                <div class="text-content">
-                    <div class="tag">ARCHIVE</div>
-                    <h3>聯邦檔案</h3>
-                </div>
+            <div class="menu-box" onclick="openDetail('nation-win', '《關於我》')">
+                <div class="box-icon"><img src="images/archive.gif" alt=""></div>
+                <div class="text-content"><div class="tag">ABOUT ME</div><h3>關於我</h3></div>
             </div>
-
-            <!-- 方塊 3 -->
-            <div class="menu-box" onclick="openDetail('skill-win', '《終極技能列表》')">
-                <div class="box-icon">
-                    <img src="images/ultimate.gif" alt="終極技能 GIF">
-                </div>
-                <div class="text-content">
-                    <div class="tag">ULTIMATE</div>
-                    <h3>終極技能</h3>
-                </div>
+            <div class="menu-box" onclick="openDetail('skill-win', '《聯絡方式》')">
+                <div class="box-icon"><img src="images/ultimate.gif" alt=""></div>
+                <div class="text-content"><div class="tag">CONTACT</div><h3>聯絡方式</h3></div>
             </div>
-
-            <!-- 方塊 4 -->
-            <div class="menu-box" onclick="openDetail('memo-win', '《轉生紀事》')">
-                <div class="box-icon">
-                    <img src="images/memory.gif" alt="轉生紀事 GIF">
-                </div>
-                <div class="text-content">
-                    <div class="tag">MEMORY</div>
-                    <h3>轉生紀事</h3>
-                </div>
+            <div class="menu-box" onclick="openDetail('memo-win', '《尚未完成》')">
+                <div class="box-icon"><img src="images/memory.gif" alt=""></div>
+                <div class="text-content"><div class="tag">COMING SOON</div><h3>尚未完成</h3></div>
             </div>
         </section>
 
-        <!-- 詳細內容展現頁 -->
         <section id="detail-section" class="page-section">
             <button class="close-btn" onclick="switchPage('menu-grid')">×</button>
             <div class="detail-page">
-                <div class="detail-header"><h2 id="detail-title">系統加載中</h2></div>
-                <div id="detail-content" style="flex-grow: 1; overflow-y: auto; margin-top: 20px;"></div>
+                <div class="detail-header"><h2 id="detail-title">系統訊息</h2></div>
+                <div id="detail-content" style="flex-grow: 1; overflow-y: auto;"></div>
             </div>
         </section>
     </div>
 
-    <!-- 隱藏數據庫內容 -->
-    <div style="display:none;">
-        <div id="data-status-win"><table><tr><td>種族：魔黏性精神體</td></tr><tr><td>稱號：聖魔混世皇</td></tr></table></div>
-        <div id="data-nation-win"><p>位置：鳩拉·特恩佩斯特聯邦國</p></div>
-        <div id="data-skill-win"><ul style="color: var(--rimuru-blue);"><li>智慧之王 (Raphael)</li><li>暴食之王 (Beelzebuth)</li></ul></div>
-        <div id="data-memo-win"><p>記錄從三上悟轉生以來的所有重要轉折點與戰鬥紀錄...</p></div>
-    </div>
+    <template id="tpl-status-win">
+        <table>
+            <tr><td class="clickable-td">作品項目 01 - </td></tr>
+            <tr><td class="clickable-td">作品項目 02 - </td></tr>
+        </table>
+    </template>
+
+    <template id="tpl-nation-win">
+        <div class="simple-text">
+            <p><strong>姓名：</strong> 您的名字</p>
+            <p>這裡已恢復為原本的排版，適合閱讀長篇文字。</p>
+        </div>
+    </template>
+
+    <template id="tpl-skill-win">
+        <table>
+            <tr onclick="window.open('https://mail.google.com/mail/u/0/#inbox', '_blank')">
+                <td class="clickable-td">
+                    <strong>GMAIL</strong><br>5B2G0017@stust.edu.tw
+                </td>
+            </tr>
+            <tr onclick="window.open('https://github.com/5b2g0017-asdfg', '_blank')">
+                <td class="clickable-td">
+                    <strong>GITHUB</strong><br>5b2g0017-asdfg
+                </td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="tpl-memo-win">
+        <div class="simple-text">系統更新中，內容即將上線。</div>
+    </template>
 
     <script>
-        // 背景粒子系統
+        // 背景粒子
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -276,26 +257,42 @@
             requestAnimationFrame(animate);
         }
         initCanvas();
-        for (let i = 0; i < 100; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 1, speedX: Math.random() * 0.4 - 0.2, speedY: Math.random() * 0.4 - 0.2, opacity: Math.random() * 0.5 + 0.2 });
+        for (let i = 0; i < 80; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 1, speedX: Math.random() * 0.4 - 0.2, speedY: Math.random() * 0.4 - 0.2, opacity: Math.random() * 0.5 + 0.2 });
         animate();
         window.addEventListener('resize', initCanvas);
 
-        // 頁面切換邏輯
+        // --- 優化的頁面切換：確保動畫播放完畢再更換狀態 ---
         function switchPage(pageId) {
             const allPages = document.querySelectorAll('.page-section');
+            const target = document.getElementById(pageId);
+
+            // 1. 先啟動舊頁面的淡出
             allPages.forEach(p => p.classList.remove('active'));
+
+            // 2. 等待淡出動畫（約 300ms）後切換 display
             setTimeout(() => {
                 allPages.forEach(p => p.style.display = 'none');
-                const target = document.getElementById(pageId);
+                
+                // 3. 設定正確的排版模式
                 target.style.display = (pageId === 'menu-grid') ? 'grid' : 'flex';
-                requestAnimationFrame(() => target.classList.add('active'));
+
+                // 4. 強制瀏覽器刷新佈局並淡入
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        target.classList.add('active');
+                    });
+                });
             }, 300);
         }
 
-        // 點選方塊開啟詳細視窗，自動抓取標題與內容
         function openDetail(dataId, titleText) {
+            const contentArea = document.getElementById('detail-content');
+            const template = document.getElementById('tpl-' + dataId);
             document.getElementById('detail-title').innerText = titleText;
-            document.getElementById('detail-content').innerHTML = document.getElementById('data-' + dataId).innerHTML;
+            
+            contentArea.innerHTML = '';
+            contentArea.appendChild(template.content.cloneNode(true));
+
             switchPage('detail-section');
         }
     </script>
