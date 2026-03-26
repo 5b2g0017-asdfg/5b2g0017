@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人網站 - 系統介面</title>
+    <title>個人網站</title>
     <style>
         :root {
             --rimuru-blue: #a0d8ef;
             --deep-space: #0a0f1d;
             --box-gap: 20px;
             --text-gap: 8px;
-            --icon-size: 100px;
+            --icon-max-size: 140px; /* 控制圖示最大尺寸 */
+            --success-green: #2ecc71;
         }
 
         body {
@@ -39,9 +40,8 @@
             z-index: 1;
         }
 
-        /* --- 改進的動畫系統 --- */
         .page-section {
-            display: none;
+            display: none; /* 預設隱藏 */
             opacity: 0;
             transform: scale(0.95);
             transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -50,14 +50,19 @@
             box-sizing: border-box;
         }
 
-        /* 當 active 類別被加入時，觸發動畫 */
+        /* 啟動時的初始狀態 */
         .page-section.active {
             opacity: 1;
             transform: scale(1);
         }
 
-        /* --- 初始啟動頁面 --- */
-        #init-page { flex-direction: column; justify-content: center; align-items: center; }
+        /* --- 啟動頁面 --- */
+        #init-page { 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
         .rimuru-core {
             width: 160px; height: 130px;
             background: linear-gradient(135deg, #a0d8ef 0%, #3498db 100%);
@@ -73,15 +78,16 @@
             color: var(--rimuru-blue); padding: 18px 50px; font-weight: bold;
             cursor: pointer; border-radius: 50px; letter-spacing: 3px;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
         .btn-main:hover { background-color: var(--rimuru-blue); color: var(--deep-space); transform: scale(1.05); }
 
-        /* --- 四方塊選單 (Grid) --- */
+        /* --- 四方塊選單 (Grid 修復) --- */
         #menu-grid {
-            grid-template-columns: repeat(2, 300px); 
-            grid-template-rows: repeat(2, 280px); 
-            column-gap: 35px;
-            row-gap: 15px;
+            grid-template-columns: repeat(2, 320px); 
+            grid-template-rows: repeat(2, 300px); 
+            column-gap: 40px;
+            row-gap: 20px;
             justify-content: center; 
             align-content: center;
         }
@@ -96,31 +102,52 @@
             flex-direction: column;
             justify-content: center; 
             align-items: center;     
-            padding: 30px;
+            padding: 20px;
             gap: var(--box-gap);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .menu-box:hover {
             background: rgba(160, 216, 239, 0.15); 
             border-color: var(--rimuru-blue); 
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(160, 216, 239, 0.4);
+            transform: translateY(-15px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(160, 216, 239, 0.3);
         }
 
-        .box-icon { width: var(--icon-size); height: var(--icon-size); display: flex; justify-content: center; align-items: center; transition: transform 0.3s ease; }
-        .box-icon img { width: 100%; height: 100%; object-fit: contain; }
+        /* --- GIF 容器：圓角且不強迫正方形 --- */
+        .box-icon { 
+            width: 100%;
+            height: var(--icon-max-size); /* 限制最高高度 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .box-icon img { 
+            max-width: 90%; 
+            max-height: 100%; 
+            width: auto; height: auto; /* 保持原比例 */
+            object-fit: contain;
+            border-radius: 20px; /* 加入圓角風格 */
+            filter: blur(3px) opacity(0.5);
+            transition: all 0.8s ease;
+        }
+        
         .menu-box:hover .box-icon { transform: scale(1.1); }
+        .menu-box:hover .box-icon img { 
+            filter: blur(0) opacity(1) drop-shadow(0 0 15px var(--rimuru-blue));
+        }
 
         .text-content { display: flex; flex-direction: column; align-items: center; gap: var(--text-gap); text-align: center; }
-        .tag { font-size: 0.8rem; color: var(--rimuru-blue); opacity: 0.6; letter-spacing: 2px; }
+        .tag { font-size: 0.8rem; color: var(--rimuru-blue); opacity: 0.7; letter-spacing: 2px; }
         h3 { font-size: 1.6rem; margin: 0; letter-spacing: 4px; font-weight: bold; }
 
-        /* --- 詳細頁面 (Flex) --- */
+        /* --- 詳細頁面 --- */
         #detail-section { justify-content: center; align-items: center; }
         .detail-page {
             width: 85%; height: 80%;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid var(--rimuru-blue);
             border-radius: 30px;
             padding: 50px;
@@ -129,8 +156,6 @@
             display: flex; flex-direction: column;
             position: relative;
         }
-        
-        .detail-header h2 { font-size: 2.5rem; color: var(--rimuru-blue); margin: 0 0 20px 0; letter-spacing: 4px; }
         
         .close-btn {
             position: fixed; top: 30px; right: 30px;
@@ -143,9 +168,8 @@
             font-size: 1.8rem; z-index: 9999; 
             transition: all 0.3s ease;
         }
-        .close-btn:hover { background: #ff4757; transform: rotate(90deg) scale(1.1); border-color: transparent; }
+        .close-btn:hover { background: #ff4757; transform: rotate(90deg) scale(1.1); }
 
-        /* --- 內容區域表格與文字 --- */
         table { width: 100%; border-spacing: 0 15px; }
         .clickable-td { 
             padding: 25px; 
@@ -153,18 +177,12 @@
             border: 1px solid rgba(160, 216, 239, 0.1);
             border-radius: 12px;
             cursor: pointer;
-            font-size: 1.1rem;
             transition: all 0.3s ease;
         }
-        .clickable-td:hover {
-            background: rgba(160, 216, 239, 0.15);
-            border-color: var(--rimuru-blue);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(160, 216, 239, 0.2);
-        }
+        .clickable-td:hover { background: rgba(160, 216, 239, 0.15); border-color: var(--rimuru-blue); transform: translateY(-5px); }
         
+        .copy-label { transition: color 0.4s ease; display: inline-block; }
         .simple-text { font-size: 1.2rem; line-height: 1.8; color: #fff; padding: 10px; }
-        a { color: var(--rimuru-blue); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -172,115 +190,138 @@
     <canvas id="bg-canvas"></canvas>
 
     <div class="wrapper">
+        <!-- 初始頁面 -->
         <section id="init-page" class="page-section active" style="display: flex;">
             <div class="rimuru-core"></div>
             <h2 style="letter-spacing: 8px; margin-bottom: 30px;">MY WEB</h2>
             <button class="btn-main" onclick="switchPage('menu-grid')">OPEN</button>
         </section>
 
+        <!-- 選單頁面 -->
         <section id="menu-grid" class="page-section">
             <button class="close-btn" onclick="switchPage('init-page')">×</button>
-            <div class="menu-box" onclick="openDetail('status-win', '《作品》')">
-                <div class="box-icon"><img src="images/analysis.gif" alt=""></div>
-                <div class="text-content"><div class="tag">WORKS</div><h3>作品</h3></div>
+            
+            <div class="menu-box" onclick="openDetail('status-win', '《作品展示》')">
+                <div class="box-icon"><img src="https://media1.tenor.com/m/vwD2E8oQEfMAAAAd/%E9%84%B0%E5%BA%A7%E8%89%BE%E8%8E%89%E5%90%8C%E5%AD%B8-alya-sometimes-hides-her-feelings-in-russian.gif" alt="works"></div>
+                <div class="text-content"><div class="tag">PORTFOLIO</div><h3>作品集</h3></div>
             </div>
+
             <div class="menu-box" onclick="openDetail('nation-win', '《關於我》')">
-                <div class="box-icon"><img src="images/archive.gif" alt=""></div>
-                <div class="text-content"><div class="tag">ABOUT ME</div><h3>關於我</h3></div>
+                <div class="box-icon"><img src="https://media1.tenor.com/m/5WKu2y1Rx1UAAAAC/franklin-lamar.gif" alt="about"></div>
+                <div class="text-content"><div class="tag">PROFILE</div><h3>關於我</h3></div>
             </div>
+
             <div class="menu-box" onclick="openDetail('skill-win', '《聯絡方式》')">
-                <div class="box-icon"><img src="images/ultimate.gif" alt=""></div>
-                <div class="text-content"><div class="tag">CONTACT</div><h3>聯絡方式</h3></div>
+                <div class="box-icon"><img src="https://static.zerochan.net/Rimuru.Tempest.full.3635171.gif" alt="contact"></div>
+                <div class="text-content"><div class="tag">SOCIAL</div><h3>聯絡方式</h3></div>
             </div>
-            <div class="menu-box" onclick="openDetail('memo-win', '《尚未完成》')">
-                <div class="box-icon"><img src="images/memory.gif" alt=""></div>
-                <div class="text-content"><div class="tag">COMING SOON</div><h3>尚未完成</h3></div>
+
+            <div class="menu-box" onclick="openDetail('memo-win', '《系統狀態》')">
+                <div class="box-icon"><img src="https://i.imgur.com/YvO54Ny.gif" alt="memo"></div>
+                <div class="text-content"><div class="tag">SYSTEM</div><h3>尚未完成</h3></div>
             </div>
         </section>
 
+        <!-- 詳細資訊頁面 -->
         <section id="detail-section" class="page-section">
             <button class="close-btn" onclick="switchPage('menu-grid')">×</button>
             <div class="detail-page">
-                <div class="detail-header"><h2 id="detail-title">系統訊息</h2></div>
-                <div id="detail-content" style="flex-grow: 1; overflow-y: auto;"></div>
+                <h2 id="detail-title" style="color:var(--rimuru-blue); border-bottom:1px solid; padding-bottom:10px;"></h2>
+                <div id="detail-content" style="margin-top:20px; overflow-y:auto;"></div>
             </div>
         </section>
     </div>
 
+    <!-- Templates -->
     <template id="tpl-status-win">
         <table>
-            <tr><td class="clickable-td">作品項目 01 - 智慧系統開發</td></tr>
-            <tr><td class="clickable-td">作品項目 02 - 前端視覺特效</td></tr>
+            <tr><td class="clickable-td">專案 01 - 互動網頁設計</td></tr>
+            <tr><td class="clickable-td">專案 02 - UI/UX 介面優化</td></tr>
         </table>
     </template>
 
     <template id="tpl-nation-win">
         <div class="simple-text">
-            <p><strong>姓名：</strong> 您的名字</p>
-            <p>這裡已恢復為原本的排版，適合閱讀長篇文字。</p>
+            <p><strong>學號：</strong> 5B2G0017</p>
+            <p>這是我的個人系統介面，整合了所有開發項目與聯絡資訊。</p>
         </div>
     </template>
 
     <template id="tpl-skill-win">
         <table>
-            <tr onclick="window.open('mailto:5b2g0017@stust.edu.tw', '_blank')">
-                <td class="clickable-td">
-                    <strong>GMAIL</strong><br>5B2G0017@stust.edu.tw
-                </td>
-            </tr>
             <tr onclick="window.open('https://github.com/5b2g0017-asdfg', '_blank')">
+                <td class="clickable-td"><strong>GITHUB (點擊開啟)</strong></td>
+            </tr>
+            <tr onclick="window.open('https://www.instagram.com/xiao.__.chang', '_blank')">
+                <td class="clickable-td"><strong>INSTAGRAM (點擊開啟)</strong></td>
+            </tr>
+            <tr onclick="copyToClipboard('5b2g0017@stust.edu.tw', this)">
                 <td class="clickable-td">
-                    <strong>GITHUB</strong><br>5b2g0017-asdfg
+                    <strong class="copy-label">GMAIL (點擊複製：5b2g0017@stust.edu.tw)</strong>
                 </td>
             </tr>
         </table>
     </template>
 
     <template id="tpl-memo-win">
-        <div class="simple-text">系統更新中，內容即將上線。</div>
+        <div class="simple-text">其餘模組正在加載中...請稍候。</div>
     </template>
 
     <script>
-        // 背景粒子
+        // 背景動畫保持不變
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = initCanvas;
+        initCanvas();
+
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                speedX: Math.random() * 0.4 - 0.2,
+                speedY: Math.random() * 0.4 - 0.2,
+                opacity: Math.random() * 0.5 + 0.2
+            });
+        }
+
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => {
                 p.x += p.speedX; p.y += p.speedY;
-                if (p.x > canvas.width || p.x < 0 || p.y > canvas.height || p.y < 0) { p.x = Math.random() * canvas.width; p.y = Math.random() * canvas.height; }
+                if (p.x > canvas.width || p.x < 0) p.speedX *= -1;
+                if (p.y > canvas.height || p.y < 0) p.speedY *= -1;
                 ctx.fillStyle = `rgba(160, 216, 239, ${p.opacity})`;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
             });
             requestAnimationFrame(animate);
         }
-        initCanvas();
-        for (let i = 0; i < 80; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 1, speedX: Math.random() * 0.4 - 0.2, speedY: Math.random() * 0.4 - 0.2, opacity: Math.random() * 0.5 + 0.2 });
         animate();
-        window.addEventListener('resize', initCanvas);
 
-        // --- 優化的頁面切換：確保動畫播放完畢再更換狀態 ---
+        // 頁面切換邏輯 (修復 Grid 顯示問題)
         function switchPage(pageId) {
             const allPages = document.querySelectorAll('.page-section');
             const target = document.getElementById(pageId);
-
-            // 1. 先啟動舊頁面的淡出
+            
+            // 先淡出所有頁面
             allPages.forEach(p => p.classList.remove('active'));
-
-            // 2. 等待淡出動畫（約 300ms）後切換 display
+            
             setTimeout(() => {
+                // 隱藏所有頁面
                 allPages.forEach(p => p.style.display = 'none');
                 
-                // 3. 設定正確的排版模式
-                target.style.display = (pageId === 'menu-grid') ? 'grid' : 'flex';
-
-                // 4. 強制瀏覽器刷新佈局並淡入
+                // 根據 ID 給予正確的 Display 屬性
+                if (pageId === 'menu-grid') {
+                    target.style.display = 'grid';
+                } else {
+                    target.style.display = 'flex';
+                }
+                
+                // 強制觸發瀏覽器重繪，然後淡入
                 requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        target.classList.add('active');
-                    });
+                    target.classList.add('active');
                 });
             }, 300);
         }
@@ -289,11 +330,22 @@
             const contentArea = document.getElementById('detail-content');
             const template = document.getElementById('tpl-' + dataId);
             document.getElementById('detail-title').innerText = titleText;
-            
             contentArea.innerHTML = '';
             contentArea.appendChild(template.content.cloneNode(true));
-
             switchPage('detail-section');
+        }
+
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                const label = element.querySelector('.copy-label');
+                const originalText = label.innerText;
+                label.style.color = "var(--success-green)";
+                label.innerText = "SUCCESS! 已複製到剪貼簿";
+                setTimeout(() => {
+                    label.style.color = "";
+                    label.innerText = originalText;
+                }, 2000);
+            });
         }
     </script>
 </body>
