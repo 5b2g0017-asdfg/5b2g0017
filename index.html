@@ -5,7 +5,539 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>個人網站</title>
     <style>
+        :root {document.addEventListener("DOMContentLoaded", () => {
+    const gameBoard = document.getElementById("game-board");
+    const playButton = document.getElementById("play-button");
+    const levelSelect = document.getElementById("level-select");
+  
+    const colors = [
+      "red",
+      "blue",
+      "green",
+      "yellow",
+      "orange",
+      "purple",
+      "pink",
+      "brown",
+      "cyan",
+      "magenta",
+      "lime",
+      "teal",
+      "indigo",
+      "violet",
+      "gold",
+      "silver",
+      "maroon",
+      "navy",
+      "olive",
+      "coral",
+    ];
+    const tubes = [];
+    let selectedTube = null;
+    let levelCount = 1;
+  
+    function chooseLevel(level) {
+      levelCount = level;
+      document.getElementById("level-count").textContent = levelCount;
+    }
+  
+    levelSelect.addEventListener("change", (event) => {
+      const selectedLevel = parseInt(event.target.value, 10);
+      chooseLevel(selectedLevel);
+    });
+  
+    function checkGameState() {
+      const allSameColor = (tube) => {
+        const waters = Array.from(tube.children);
+        return (
+          waters.length === 4 &&
+          waters.every(
+            (water) =>
+              water.style.backgroundColor === waters[0].style.backgroundColor
+          )
+        );
+      };
+  
+      let completedTubes = 0;
+      tubes.forEach((tube) => {
+        if (allSameColor(tube)) {
+          completedTubes++;
+        }
+      });
+      document.getElementById("completed-tubes-count").textContent =
+        completedTubes;
+  
+      //檢查是否所有的試管都完成或者是空試管
+      if (
+        tubes.every((tube) => tube.childElementCount === 0 || allSameColor(tube))
+      ) {
+        if (levelCount === 10) {
+          alert("恭喜!你已經完成所有挑戰!!");
+        } else {
+          alert("你已經完成本關卡!");
+          levelCount++;
+          document.getElementById("level-count").textContent = levelCount;
+          document.getElementById("completed-tubes-count").textContent = 0;
+          chooseLevel(levelCount);
+          createTubes();
+          fillTubes();
+        }
+      }
+    }
+  
+    function pourWater(fromTube, toTube) {
+      let fromWater = fromTube.querySelector(".water:last-child");
+      let toWater = toTube.querySelector(".water:last-child");
+  
+      if (!toWater) {
+        const color = fromWater ? fromWater.style.backgroundColor : null;
+        while (
+          fromWater &&
+          fromWater.style.backgroundColor === color &&
+          toTube.childElementCount < 4
+        ) {
+          toTube.appendChild(fromWater);
+          fromWater = fromTube.querySelector(".water:last-child");
+        }
+      } else {
+        while (
+          fromWater &&<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人網站</title>
+    <style>
         :root {
+            --rimuru-blue: #a0d8ef;
+            --deep-space: #0a0f1d;
+            --box-gap: 20px;
+            --text-gap: 8px;
+            --icon-max-size: 140px; /* 控制圖示最大尺寸 */
+            --success-green: #2ecc71;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--deep-space);
+            color: #fff;
+            font-family: 'Orbitron', 'PingFang TC', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #1a2a4a 0%, #0a0f1d 100%);
+        }
+
+        .wrapper {
+            position: relative;
+            width: 100%; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .page-section {
+            display: none; /* 預設隱藏 */
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            width: 100%; height: 100%;
+            position: absolute;
+            box-sizing: border-box;
+        }
+
+        /* 啟動時的初始狀態 */
+        .page-section.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* --- 啟動頁面 --- */
+        #init-page { 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
+        .rimuru-core {
+            width: 160px; height: 130px;
+            background: linear-gradient(135deg, #a0d8ef 0%, #3498db 100%);
+            border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%;
+            margin-bottom: 30px;
+            box-shadow: 0 0 50px var(--rimuru-blue);
+            animation: slimeFloat 4s infinite ease-in-out;
+        }
+        @keyframes slimeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .btn-main {
+            background: transparent; border: 2px solid var(--rimuru-blue);
+            color: var(--rimuru-blue); padding: 18px 50px; font-weight: bold;
+            cursor: pointer; border-radius: 50px; letter-spacing: 3px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        .btn-main:hover { background-color: var(--rimuru-blue); color: var(--deep-space); transform: scale(1.05); }
+
+        /* --- 四方塊選單 (Grid 修復) --- */
+        #menu-grid {
+            grid-template-columns: repeat(2, 320px); 
+            grid-template-rows: repeat(2, 300px); 
+            column-gap: 40px;
+            row-gap: 20px;
+            justify-content: center; 
+            align-content: center;
+        }
+
+        .menu-box {
+            background: rgba(10, 15, 29, 0.7);
+            border: 1px solid rgba(160, 216, 239, 0.2);
+            border-radius: 20px; 
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;     
+            padding: 20px;
+            gap: var(--box-gap);
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .menu-box:hover {
+            background: rgba(160, 216, 239, 0.15); 
+            border-color: var(--rimuru-blue); 
+            transform: translateY(-15px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(160, 216, 239, 0.3);
+        }
+
+        /* --- GIF 容器：圓角且不強迫正方形 --- */
+        .box-icon { 
+            width: 100%;
+            height: var(--icon-max-size); /* 限制最高高度 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .box-icon img { 
+            max-width: 90%; 
+            max-height: 100%; 
+            width: auto; height: auto; /* 保持原比例 */
+            object-fit: contain;
+            border-radius: 20px; /* 加入圓角風格 */
+            filter: blur(3px) opacity(0.5);
+            transition: all 0.8s ease;
+        }
+        
+        .menu-box:hover .box-icon { transform: scale(1.1); }
+        .menu-box:hover .box-icon img { 
+            filter: blur(0) opacity(1) drop-shadow(0 0 15px var(--rimuru-blue));
+        }
+
+        .text-content { display: flex; flex-direction: column; align-items: center; gap: var(--text-gap); text-align: center; }
+        .tag { font-size: 0.8rem; color: var(--rimuru-blue); opacity: 0.7; letter-spacing: 2px; }
+        h3 { font-size: 1.6rem; margin: 0; letter-spacing: 4px; font-weight: bold; }
+
+        /* --- 詳細頁面 --- */
+        #detail-section { justify-content: center; align-items: center; }
+        .detail-page {
+            width: 85%; height: 80%;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--rimuru-blue);
+            border-radius: 30px;
+            padding: 50px;
+            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: fixed; top: 30px; right: 30px;
+            width: 50px; height: 50px;
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; border-radius: 50%; 
+            cursor: pointer; display: flex; 
+            justify-content: center; align-items: center;
+            font-size: 1.8rem; z-index: 9999; 
+            transition: all 0.3s ease;
+        }
+        .close-btn:hover { background: #ff4757; transform: rotate(90deg) scale(1.1); }
+
+        table { width: 100%; border-spacing: 0 15px; }
+        .clickable-td { 
+            padding: 25px; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(160, 216, 239, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .clickable-td:hover { background: rgba(160, 216, 239, 0.15); border-color: var(--rimuru-blue); transform: translateY(-5px); }
+        
+        .copy-label { transition: color 0.4s ease; display: inline-block; }
+        .simple-text { font-size: 1.2rem; line-height: 0.8; color: #fff; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="wrapper">
+        <!-- 初始頁面 -->
+        <section id="init-page" class="page-section active" style="display: flex;">
+            <div class="rimuru-core"></div>
+            <h2 style="letter-spacing: 8px; margin-bottom: 30px;">MY WEB</h2>
+            <button class="btn-main" onclick="switchPage('menu-grid')">OPEN</button>
+        </section>
+
+        <!-- 選單頁面 -->
+        <section id="menu-grid" class="page-section">
+            <button class="close-btn" onclick="switchPage('init-page')">×</button>
+            
+            <div class="menu-box" onclick="openDetail('status-win', '《作品展示》')">
+                <div class="box-icon"><img src="https://media1.tenor.com/m/Y1PtqpWHKzMAAAAC/maria-mikhailovna-kujou-alya-sometimes-hides-her-feelings-in-russian.gif" alt="works"></div>
+                <div class="text-content"><div class="tag">PORTFOLIO</div><h3>作品集</h3></div>
+            </div>
+
+            <div class="menu-box" onclick="openDetail('nation-win', '《關於我》')">
+                <div class="box-icon"><img src="https://media1.tenor.com/m/5WKu2y1Rx1UAAAAC/franklin-lamar.gif" alt="about"></div>
+                <div class="text-content"><div class="tag">PROFILE</div><h3>關於我</h3></div>
+            </div>
+
+            <div class="menu-box" onclick="openDetail('skill-win', '《聯絡方式》')">
+                <div class="box-icon"><img src="https://media1.tenor.com/m/MYo3MGCRzwUAAAAC/%E3%83%AA%E3%83%A0%E3%83%AB-rimuru-tempest.gif" alt="contact"></div>
+                <div class="text-content"><div class="tag">SOCIAL</div><h3>聯絡方式</h3></div>
+            </div>
+
+            <div class="menu-box" onclick="openDetail('memo-win', '《尚未完成》')">
+                <div class="box-icon"><img src="https://i.imgur.com/YvO54Ny.gif" alt="memo"></div>
+                <div class="text-content"><div class="tag">SYSTEM</div><h3>尚未完成</h3></div>
+            </div>
+        </section>
+
+        <!-- 詳細資訊頁面 -->
+        <section id="detail-section" class="page-section">
+            <button class="close-btn" onclick="switchPage('menu-grid')">×</button>
+            <div class="detail-page">
+                <h2 id="detail-title" style="color:var(--rimuru-blue); border-bottom:1px solid; padding-bottom:10px;"></h2>
+                <div id="detail-content" style="margin-top:20px; overflow-y:auto;"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Templates -->
+    <template id="tpl-status-win">
+        <table>
+            <tr onclick="window.open('https://5b2g0017-asdfg.github.io/water-puzzle/', '_blank')">
+                <td class="clickable-td"><strong>專案01-水排序</strong></td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="tpl-nation-win">
+        <div class="simple-text">
+            <p><strong>姓名</strong>：Jimmy</p>
+            <p><strong>興趣</strong>：動漫、籃球、棒球、傳說對決</p>
+            <p><strong>近期目標</strong>：考駕照、存錢買車、存錢出國</p>
+        </div>
+    </template>
+
+    <template id="tpl-skill-win">
+        <table>
+            <tr onclick="window.open('https://github.com/5b2g0017-asdfg', '_blank')">
+                <td class="clickable-td"><strong>GITHUB</strong></td>
+            </tr>
+            <tr onclick="window.open('https://www.instagram.com/xiao.__.chang', '_blank')">
+                <td class="clickable-td"><strong>INSTAGRAM</strong></td>
+            </tr>
+            <tr onclick="copyToClipboard('5b2g0017@stust.edu.tw', this)">
+                <td class="clickable-td">
+                    <strong class="copy-label">GMAIL(點擊複製)</strong>
+                </td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="tpl-memo-win">
+        <div class="simple-text">coming soon...</div>
+    </template>
+
+    <script>
+        // 背景動畫保持不變
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = initCanvas;
+        initCanvas();
+
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                speedX: Math.random() * 0.4 - 0.2,
+                speedY: Math.random() * 0.4 - 0.2,
+                opacity: Math.random() * 0.5 + 0.2
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX; p.y += p.speedY;
+                if (p.x > canvas.width || p.x < 0) p.speedX *= -1;
+                if (p.y > canvas.height || p.y < 0) p.speedY *= -1;
+                ctx.fillStyle = `rgba(160, 216, 239, ${p.opacity})`;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 頁面切換邏輯 (修復 Grid 顯示問題)
+        function switchPage(pageId) {
+            const allPages = document.querySelectorAll('.page-section');
+            const target = document.getElementById(pageId);
+            
+            // 先淡出所有頁面
+            allPages.forEach(p => p.classList.remove('active'));
+            
+            setTimeout(() => {
+                // 隱藏所有頁面
+                allPages.forEach(p => p.style.display = 'none');
+                
+                // 根據 ID 給予正確的 Display 屬性
+                if (pageId === 'menu-grid') {
+                    target.style.display = 'grid';
+                } else {
+                    target.style.display = 'flex';
+                }
+                
+                // 強制觸發瀏覽器重繪，然後淡入
+                requestAnimationFrame(() => {
+                    target.classList.add('active');
+                });
+            }, 300);
+        }
+
+        function openDetail(dataId, titleText) {
+            const contentArea = document.getElementById('detail-content');
+            const template = document.getElementById('tpl-' + dataId);
+            document.getElementById('detail-title').innerText = titleText;
+            contentArea.innerHTML = '';
+            contentArea.appendChild(template.content.cloneNode(true));
+            switchPage('detail-section');
+        }
+
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                const label = element.querySelector('.copy-label');
+                const originalText = label.innerText;
+                label.style.color = "var(--success-green)";
+                label.innerText = "SUCCESS! 已複製到剪貼簿";
+                setTimeout(() => {
+                    label.style.color = "";
+                    label.innerText = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
+          fromWater.style.backgroundColor === toWater.style.backgroundColor &&
+          toTube.childElementCount < 4
+        ) {
+          toTube.appendChild(fromWater);
+          fromWater = fromTube.querySelector(".water:last-child");
+          toWater = toTube.querySelector(".water:last-child");
+        }
+      }
+      checkGameState();
+    }
+  
+    function selectTube(tube) {
+      if (selectedTube) {
+        if (selectedTube !== tube) {
+          pourWater(selectedTube, tube);
+        }
+        selectedTube.classList.remove("selected");
+        selectedTube = null;
+      } else {
+        selectedTube = tube;
+        tube.classList.add("selected");
+      }
+    }
+  
+    function createTubes() {
+      gameBoard.innerHTML = "";
+      tubes.length = 0;
+  
+      for (let i = 0; i < levelCount + 1; i++) {
+        const tube = document.createElement("div");
+        tube.classList.add("tube");
+        tube.addEventListener("click", () => selectTube(tube));
+        gameBoard.appendChild(tube);
+        tubes.push(tube);
+      }
+  
+      //新增兩管空的試管來當作緩衝使用
+      for (let i = 0; i < 2; i++) {
+        const emptyTube = document.createElement("div");
+        emptyTube.classList.add("tube");
+        emptyTube.addEventListener("click", () => selectTube(emptyTube));
+        gameBoard.appendChild(emptyTube);
+        tubes.push(emptyTube);
+      }
+    }
+  
+    function fillTubes() {
+      // 填滿試管顏色
+      const gameColors = colors.slice(0, Math.min(levelCount + 1, colors.length));
+      const waterBlocks = [];
+  
+      // 對於每一種顏色，產生4個block
+      gameColors.forEach((color) => {
+        for (let i = 0; i < 4; i++) {
+          waterBlocks.push(color);
+        }
+      });
+  
+      //將顏色打亂
+      waterBlocks.sort(() => 0.5 - Math.random());
+  
+      //將waterBlock分散在不同的試管內
+      let blockIndex = 0;
+      tubes.slice(0, levelCount + 1).forEach((tube) => {
+        for (let i = 0; i < 4; i++) {
+          if (blockIndex < waterBlocks.length) {
+            const water = document.createElement("div");
+            water.classList.add("water");
+            water.style.backgroundColor = waterBlocks[blockIndex];
+            water.style.height = "20%";
+            tube.appendChild(water);
+            blockIndex++;
+          }
+        }
+      });
+    }
+  
+    playButton.addEventListener("click", () => {
+      tubes.length = 0;
+      createTubes();
+      fillTubes();
+    });
+  });
             --rimuru-blue: #a0d8ef;
             --deep-space: #0a0f1d;
             --box-gap: 20px;
