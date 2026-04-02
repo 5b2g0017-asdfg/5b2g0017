@@ -452,12 +452,17 @@
         }
         animate();
 
-        // 頁面切換邏輯
-        function switchPage(pageId) {
+        // 頁面切換邏輯 (加入 History API)
+        function switchPage(pageId, isBack = false) {
             const allPages = document.querySelectorAll('.page-section');
             const target = document.getElementById(pageId);
 
             allPages.forEach(p => p.classList.remove('active'));
+
+            // 如果不是按下返回鍵觸發的，就新增一筆歷史紀錄
+            if (!isBack) {
+                history.pushState({ page: pageId }, '', '');
+            }
 
             setTimeout(() => {
                 allPages.forEach(p => p.style.display = 'none');
@@ -473,6 +478,20 @@
                 });
             }, 300);
         }
+
+        // 監聽返回鍵事件
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.page) {
+                // 如果歷史紀錄裡有頁面資訊，就切換過去
+                switchPage(event.state.page, true);
+            } else {
+                // 如果回到了最原始狀態，就回初始頁
+                switchPage('init-page', true);
+            }
+        });
+
+        // 初始化一筆歷史紀錄，防止一開始按返回就退出
+        history.replaceState({ page: 'init-page' }, '', '');
 
         function openDetail(dataId, titleText) {
             const contentArea = document.getElementById('detail-content');
